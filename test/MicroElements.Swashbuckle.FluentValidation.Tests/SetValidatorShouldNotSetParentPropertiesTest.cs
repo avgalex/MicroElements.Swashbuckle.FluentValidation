@@ -49,14 +49,14 @@ namespace MicroElements.Swashbuckle.FluentValidation.Tests
             var referenceSchema = SchemaGenerator(new ModelValidator()).GenerateSchema(typeof(Model), schemaRepository);
 
             var modelSchema = schemaRepository.GetSchema("Model");
-            var listItemsProperty = modelSchema.Properties[nameof(Model.ListItems)];
-            var subModelProperty = modelSchema.Properties[nameof(Model.SubModel)];
+            var listItemsProperty = modelSchema.GetProperty(nameof(Model.ListItems));
             listItemsProperty.Should().NotBeNull();
-            subModelProperty.Should().NotBeNull();
+            // SubModel is a schema reference in OpenAPI v2, so GetProperty returns null - verify key exists instead
+            modelSchema.Properties.Keys.Should().Contain(nameof(Model.SubModel));
             modelSchema.Required.Should().BeEmpty(because: "No required in Model");
 
             var subModelSchema = schemaRepository.GetSchema("SubModel");
-            var subModelListItemsProperty = subModelSchema.Properties[nameof(SubModel.ListItems)];
+            var subModelListItemsProperty = subModelSchema.GetProperty(nameof(SubModel.ListItems));
             subModelListItemsProperty.Should().NotBeNull();
             subModelSchema.Required.Should().Contain(nameof(SubModel.ListItems), because: "ListItems is required in SubModel");
             subModelSchema.Required.Should().HaveCount(1);
