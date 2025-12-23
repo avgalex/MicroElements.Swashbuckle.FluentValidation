@@ -452,7 +452,10 @@ namespace MicroElements.OpenApi
 #if OPENAPI_V2
             if (schema.Properties == null)
                 return Enumerable.Empty<KeyValuePair<string, OpenApiSchema>>();
+            // Filter out OpenApiSchemaReference entries (e.g., enum types) to avoid InvalidCastException
+            // Issue #176: https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation/issues/176
             return schema.Properties
+                .Where(kvp => kvp.Value is OpenApiSchema)
                 .Select(kvp => new KeyValuePair<string, OpenApiSchema>(kvp.Key, (OpenApiSchema)kvp.Value));
 #else
             return schema.Properties ?? Enumerable.Empty<KeyValuePair<string, OpenApiSchema>>();
