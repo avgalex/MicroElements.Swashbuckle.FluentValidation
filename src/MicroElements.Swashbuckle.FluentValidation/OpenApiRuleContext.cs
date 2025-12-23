@@ -45,9 +45,17 @@ namespace MicroElements.Swashbuckle.FluentValidation
                     throw new ApplicationException($"Schema for type '{schemaType}' does not contain property '{PropertyKey}'.\nRegister {typeof(INameResolver)} if name in type differs from name in json.");
                 }
 
-                var schemaProperty = OpenApiSchemaCompatibility.GetProperty(Schema, PropertyKey)!;
+                var schemaProperty = OpenApiSchemaCompatibility.GetProperty(Schema, PropertyKey);
+
+                // Property is a schema reference (enum, nested class) - return empty schema to skip validation
+                // Issue #176: https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation/issues/176
+                if (schemaProperty == null)
+                {
+                    return new OpenApiSchema();
+                }
+
                 var items = OpenApiSchemaCompatibility.GetItems(schemaProperty);
-                return !ValidationRuleInfo.IsCollectionRule() ? schemaProperty : items!;
+                return !ValidationRuleInfo.IsCollectionRule() ? schemaProperty : (items ?? schemaProperty);
             }
         }
 
