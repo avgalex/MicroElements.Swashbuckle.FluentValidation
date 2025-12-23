@@ -1,3 +1,8 @@
+# Changes in 7.0.2
+- Fixed: InvalidCastException when models contain enum properties (Issue #176)
+  - In Microsoft.OpenApi 2.x, enum properties are represented as `OpenApiSchemaReference` instead of `OpenApiSchema`
+  - Filter out schema references in `GetProperties()` method to avoid cast exception
+
 # Changes in 7.0.1
 - Fixed: FluentValidation rules not applied to `[FromForm]` parameters (Issue #170)
   - Added `RequestBody` processing in `FluentValidationOperationFilter` for `multipart/form-data` and `application/x-www-form-urlencoded` content types
