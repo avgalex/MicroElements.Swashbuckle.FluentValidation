@@ -1,3 +1,8 @@
+# Changes in 7.0.3
+- Fixed: NullReferenceException when models contain nested object properties (Issue #176 extended)
+  - Handle `OpenApiSchemaReference` for nested class properties in `OpenApiRuleContext`
+  - Add safe `TryGetValue` check in `NSwagRuleContext`
+
 # Changes in 7.0.2
 - Fixed: InvalidCastException when models contain enum properties (Issue #176)
   - In Microsoft.OpenApi 2.x, enum properties are represented as `OpenApiSchemaReference` instead of `OpenApiSchema`
