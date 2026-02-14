@@ -28,7 +28,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      # Workaround for claude-code-action not supporting fork PRs
+      # See: https://github.com/anthropics/claude-code-action/issues/821
+      - name: Fetch PR branch (fork support)
+        if: github.event.issue.pull_request || github.event.pull_request
+        run: |
+          PR_NUMBER=${{ github.event.issue.number || github.event.pull_request.number }}
+          if [ -n "$PR_NUMBER" ]; then
+            git fetch origin pull/${PR_NUMBER}/head:pr-${PR_NUMBER} || true
+            git checkout pr-${PR_NUMBER} || true
+          fi
 
       - name: Run Claude Code
         id: claude
