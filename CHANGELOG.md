@@ -1,3 +1,9 @@
+# Changes in 7.0.4-beta.1
+- Fixed: `[AsParameters]` types in minimal API and `[FromQuery]` container types create unused schemas in `components/schemas` (Issue #180)
+  - `GetSchemaForType()` registers schemas in `SchemaRepository` as a side-effect of `GenerateSchema()`
+  - Added check-and-cleanup: snapshot existing schema IDs before processing, remove side-effect schemas after applying validation rules to parameters
+  - Fix applied to both default path (`FluentValidationOperationFilter`) and experimental path (`FluentValidationDocumentFilter`)
+
 # Changes in 7.0.3
 - Fixed: NullReferenceException when models contain nested object properties (Issue #176 extended)
   - Handle `OpenApiSchemaReference` for nested class properties in `OpenApiRuleContext`
