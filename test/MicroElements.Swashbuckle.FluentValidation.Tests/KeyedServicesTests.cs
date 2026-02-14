@@ -91,7 +91,7 @@ namespace MicroElements.Swashbuckle.FluentValidation.Tests
             var registry = scope.ServiceProvider.GetRequiredService<IValidatorRegistry>();
 
             var validators = registry.GetValidators(typeof(KeyedModel)).ToList();
-            validators.Should().HaveCountGreaterThanOrEqualTo(1);
+            validators.Should().HaveCount(1, "IsOneValidatorForType is true by default, so only the first (non-keyed) validator is returned");
         }
 
         [Fact]
