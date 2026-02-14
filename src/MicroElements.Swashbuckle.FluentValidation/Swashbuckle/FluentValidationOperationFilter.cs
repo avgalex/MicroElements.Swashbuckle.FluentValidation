@@ -100,6 +100,12 @@ namespace MicroElements.Swashbuckle.FluentValidation
 
         private void ApplyRulesToParameters(OpenApiOperation operation, OperationFilterContext context, SwashbuckleSchemaProvider schemaProvider)
         {
+            // Issue #180: Track schemas that exist before our processing.
+            // GetSchemaForType() has a side-effect of registering schemas in SchemaRepository.
+            // For [AsParameters]/[FromQuery] container types, Swashbuckle does NOT create schemas
+            // (it expands them into individual parameters), so any schemas we create are unused.
+            var existingSchemaIds = new HashSet<string>(context.SchemaRepository.Schemas.Keys);
+
             foreach (var operationParameter in operation.Parameters!)
             {
                 var apiParameterDescription = context.ApiDescription.ParameterDescriptions.FirstOrDefault(description =>
@@ -209,6 +215,16 @@ namespace MicroElements.Swashbuckle.FluentValidation
                             }
                         }
                     }
+                }
+            }
+
+            // Issue #180: Remove schemas that we created as a side-effect of GetSchemaForType().
+            // These schemas were not created by Swashbuckle and are not referenced elsewhere.
+            foreach (var schemaId in context.SchemaRepository.Schemas.Keys.ToArray())
+            {
+                if (!existingSchemaIds.Contains(schemaId))
+                {
+                    context.SchemaRepository.Schemas.Remove(schemaId);
                 }
             }
         }
