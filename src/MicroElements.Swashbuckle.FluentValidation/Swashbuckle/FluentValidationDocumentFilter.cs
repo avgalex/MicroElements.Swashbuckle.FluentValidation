@@ -77,6 +77,12 @@ namespace MicroElements.Swashbuckle.FluentValidation
         {
             var schemaRepositorySchemas = context.SchemaRepository.Schemas;
             var schemaIdSelector = _schemaGenerationOptions.SchemaIdSelector;
+
+            // Issue #180: Track schemas that exist before our processing.
+            // GetSchemaForType() has a side-effect of registering schemas in SchemaRepository.
+            // For [AsParameters]/[FromQuery] container types, Swashbuckle does NOT create schemas
+            // (it expands them into individual parameters), so any schemas we create are unused.
+            var existingSchemaIds = new HashSet<string>(schemaRepositorySchemas.Keys);
             var schemaProvider = new SwashbuckleSchemaProvider(context.SchemaRepository, context.SchemaGenerator, schemaIdSelector);
 
             var apiDescriptions = context.ApiDescriptions.ToArray();
@@ -217,6 +223,17 @@ namespace MicroElements.Swashbuckle.FluentValidation
                         }
                     }
                 }
+            }
+
+            // Issue #180: Remove schemas that we created as a side-effect of GetSchemaForType().
+            // These schemas were not created by Swashbuckle and are not referenced elsewhere.
+            var schemasToRemove = schemaRepositorySchemas.Keys
+                .Where(key => !existingSchemaIds.Contains(key))
+                .ToList();
+
+            foreach (var schemaId in schemasToRemove)
+            {
+                schemaRepositorySchemas.Remove(schemaId);
             }
         }
 
